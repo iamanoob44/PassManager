@@ -84,12 +84,42 @@ def option():
             print("No passwords found!!")
 
         if passwords:
-            mess = "List of passwords:\n"
+
+            """ mess = "List of passwords:\n"
             for name, password in passwords.items():
                 # generating a proper message
                 mess += f"Password for {name} is {password}\n"
             # Showing the message
-            messagebox.showinfo("Passwords", mess)
+            messagebox.showinfo("Passwords", mess) """ # initial one
+
+            list_win = Toplevel(app)
+            list_win.title("List of Passwords")
+            list_win.geometry("1000x1000")
+
+            tree = ttk.Treeview(list_win) 
+            tree["columns"] = ("App Name", "Password")
+            tree.column("#0", width=0, stretch=NO)
+            tree.column("App Name", anchor=W, width=150)
+            tree.column("Password", anchor=W, width=150)
+
+            tree.heading("#0", text="", anchor=W)
+            tree.heading("App Name", text="App Name", anchor=W)
+            tree.heading("Password", text="Password", anchor=W)
+
+            # Sorts entries based on the first letter of the App Name
+            def custom_sort_appKey(item):
+                return item[0].upper()
+            
+            sorted_app_names = sorted(passwords.keys(), key=custom_sort_appKey)
+
+            for idx, name in enumerate(sorted_app_names, 1):
+                password = passwords[name]
+                tree.insert(parent='', index='end', iid=idx, text='', values=(name, password))
+            
+            style = ttk.Style()
+            style.configure("Treeview.Heading", font=('Arial', 12, 'bold'), foreground = "Blue")
+            tree.pack(expand=True, fill='both')
+
         else:
             messagebox.showinfo("Passwords", "Empty List !!")
 
