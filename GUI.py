@@ -94,7 +94,7 @@ def option():
             top_frame = Frame(list_win)
             top_frame.pack(side=TOP, pady=10)
 
-            search_label = Label(top_frame, text="App Search:", font=('Arial', 12, 'bold'), foreground='Red')
+            search_label = Label(top_frame, text="App Search:", font=('Arial', 15, 'bold'), foreground='Red')
             search_label.pack(side=LEFT, padx=10)
             search_entry = Entry(top_frame, textvariable=search_Var, font=('Arial', 15), foreground='Red')
             search_entry.pack(side=LEFT, padx=10)
