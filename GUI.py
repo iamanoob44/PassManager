@@ -84,19 +84,22 @@ def option():
             print("No passwords found!!")
 
         if passwords:
-
-            """ mess = "List of passwords:\n"
-            for name, password in passwords.items():
-                # generating a proper message
-                mess += f"Password for {name} is {password}\n"
-            # Showing the message
-            messagebox.showinfo("Passwords", mess) """ # initial one
-
             list_win = Toplevel(app)
             list_win.title("List of Passwords")
             list_win.geometry("1000x1000")
 
-            tree = ttk.Treeview(list_win) 
+            search_Var = StringVar()
+            search_Var.trace('w', lambda name, index, mode: delayed_filter())
+
+            top_frame = Frame(list_win)
+            top_frame.pack(side=TOP, pady=10)
+
+            search_label = Label(top_frame, text="App Search:", font=('Arial', 12, 'bold'), foreground='Red')
+            search_label.pack(side=LEFT, padx=10)
+            search_entry = Entry(top_frame, textvariable=search_Var, font=('Arial', 15), foreground='Red')
+            search_entry.pack(side=LEFT, padx=10)
+
+            tree = ttk.Treeview(list_win)
             tree["columns"] = ("App Name", "Password")
             tree.column("#0", width=0, stretch=NO)
             tree.column("App Name", anchor=W, width=150)
@@ -106,19 +109,36 @@ def option():
             tree.heading("App Name", text="App Name", anchor=W)
             tree.heading("Password", text="Password", anchor=W)
 
-            # Sorts entries based on the first letter of the App Name
             def custom_sort_appKey(item):
                 return item[0].upper()
-            
+
             sorted_app_names = sorted(passwords.keys(), key=custom_sort_appKey)
 
             for idx, name in enumerate(sorted_app_names, 1):
                 password = passwords[name]
                 tree.insert(parent='', index='end', iid=idx, text='', values=(name, password))
-            
+
             style = ttk.Style()
-            style.configure("Treeview.Heading", font=('Arial', 12, 'bold'), foreground = "Blue")
+            style.configure("Treeview.Heading", font=('Arial', 12, 'bold'), foreground="Blue")
             tree.pack(expand=True, fill='both')
+
+            def filter_tree():
+                query = search_Var.get().capitalize()
+                found = False
+                for item in tree.get_children():
+                    if query in tree.item(item, 'values')[0].capitalize():
+                        tree.item(item, open=True)
+                        tree.selection_set(item)
+                        found = True
+                    else:
+                        tree.selection_remove(item)
+                if not found and query:
+                    messagebox.showinfo("Password Does Not Exist", f"No password found for '{query}'.")
+
+            def delayed_filter():
+                if hasattr(list_win, 'after_id'):
+                    list_win.after_cancel(list_win.after_id)
+                list_win.after_id = list_win.after(800, filter_tree)  
 
         else:
             messagebox.showinfo("Passwords", "Empty List !!")
