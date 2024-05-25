@@ -4,6 +4,7 @@ from tkinter import messagebox
 import os
 import hashlib
 
+
 def SHA_256(hash_string):
     sha_signature = hashlib.sha256(hash_string.encode()).hexdigest()
     return sha_signature
@@ -14,20 +15,32 @@ def option():
     
     def add():
         # accepting input from the user
-        username = entryName.get()
+        username = entryName.get().capitalize()
+
         # accepting password input from the user
         password = entryPassword.get()
+
+
+
         if username and password:
-            with open("passwords.txt", 'a') as f:
-                f.write(f"{username} {password}\n")
-            messagebox.showinfo("Success", "Password added !!")
+
+            # Confirm entry
+            confirm = messagebox.askyesno("Confirm Add", 
+                                              f"Verify and add the Password for {username}?\nPassword : {password}")
+            
+            if confirm:
+                with open("passwords.txt", 'a') as f:
+                    f.write(f"{username} {password}\n")
+                messagebox.showinfo("Success", "Password added !!")
+            else:
+                return # Try again , revert back to the platform
         else:
             messagebox.showerror("Error", "Please enter both the fields")
 
 
     def get():
         # accepting input from the user
-        username = entryName.get()
+        username = entryName.get().capitalize()
 
         # creating a dictionary to store the data in the form of key-value pairs
         passwords = {}
@@ -42,17 +55,19 @@ def option():
             # displaying the error message
             print("ERROR !!")
 
-        if passwords:
+        if passwords and len(username) != 0:
             mess = "Your passwords:\n"
             for i in passwords:
                 if i == username:
                     mess += f"Password for {username} is {passwords[i]}\n"
                     break
             else:
-                mess += "No Such Username Exists !!"
+                mess += "No Such App Name Exists !!"
             messagebox.showinfo("Passwords", mess)
+        elif len(username) == 0:
+            messagebox.showerror("App Name", f"Please fill in the field: 'App Name'")
         else:
-            messagebox.showinfo("Passwords", "EMPTY LIST!!")
+            messagebox.showerror("Error", f"No such app name: {username} exists!")
 
 
     def getlist():
@@ -80,7 +95,10 @@ def option():
 
     def delete():
         # accepting input from the user
-        username = entryName.get()
+        username = entryName.get().capitalize()
+
+        # Check if app name exist
+        user_found = False
 
         # creating a temporary list to store the data
         temp_passwords = []
@@ -92,16 +110,38 @@ def option():
                     i = k.split(' ')
                     if i[0] != username:
                         temp_passwords.append(f"{i[0]} {i[1]}")
+                    else:
+                        user_found = True # Set true once data is read
+            
+            if user_found and len(username) != 0:
 
-            # writing the modified data back to the file
-            with open("passwords.txt", 'w') as f:
-                for line in temp_passwords:
-                    f.write(line)
-
-            messagebox.showinfo(
-                "Success", f"User {username} deleted successfully!")
+            #Ask for confirmation from the user 
+                confirm = messagebox.askyesno("Confirm Delete", 
+                                              f"Are you sure you want to delete the password for {username}?")
+                
+                if confirm:
+                # writing the modified data back to the file
+                    with open("passwords.txt", 'w') as f:
+                        for line in temp_passwords:
+                            f.write(line)
+                    messagebox.showinfo(
+                    "Success", f"App: {username} deleted successfully!")
+                else:
+                    messagebox.showinfo(
+                    "Cancelled", f"The password for {username} still remains!")
+            elif len(username) == 0:
+                messagebox.showerror("Error", f"Please fill in the field: 'App Name'")
+            else:
+                 messagebox.showerror("Error", f"App: {username} does not exist!")
+        
         except Exception as e:
-            messagebox.showerror("Error", f"Error deleting user {username}: {e}")
+            messagebox.showerror("Error", f"Error deleting app {username}: {e}")
+
+    def show_password():
+        if entryPassword.cget('show') == '*':
+            entryPassword.config(show='')
+        else:
+            entryPassword.config(show='*')
     
     app = Tk()
     windowWidth = app.winfo_reqwidth()
@@ -138,6 +178,10 @@ def option():
     # Delete button
     buttonDelete = Button(app, text="Delete", command=delete)
     buttonDelete.grid(row=3, column=1, padx=15, pady=8, sticky="we")
+
+    # Show Password button
+    togglePassword = Checkbutton(app, text='Show Password', command=show_password)
+    togglePassword.grid(row=1, column=2, padx=12, pady=5)
 
 
 
@@ -200,7 +244,7 @@ positionRight = int(win.winfo_screenwidth()/2 - windowWidth/2)
 positionDown = int(win.winfo_screenheight()/2 - windowHeight/2)
 win.geometry("+{}+{}".format(positionRight, positionDown))
 
-#starter
+# Initializer
 
 verify = 0
 words = []
@@ -212,6 +256,9 @@ for word in data.readline():
     if word != "\n":
         words.append(word)
 data.close()
+
+# Checks whether it is a first-time user
+
 try:
     for run in range(len(code)):
         if words[run] == code[run]:
@@ -221,7 +268,7 @@ except:
         
 if verify == len("@4tBp:>s#&^"):
 
-    #password box
+    # Password box
     
     win.title("PassManager")
     Label(win, text = "   Enter password to have access to the program   ", fg = "red").grid(row = 0, columnspan = 2, pady = 2)
@@ -229,7 +276,7 @@ if verify == len("@4tBp:>s#&^"):
     passw = Entry(win, show = "*")
     passw.grid(row = 2, column = 1, sticky = W)
     
-    #check button
+    # Check button
     
     equal = Button(win, text = "Submit", width = 10, bg = "red")
     equal.bind("<Button-1>", checkpassword)
@@ -237,17 +284,17 @@ if verify == len("@4tBp:>s#&^"):
 
 else:   
     
-    #middle screen
+    # Formatting middle screen
     
     win.geometry("+{}+{}".format(positionRight, positionDown))
     win.title("Setup")
     
-    #new user text
+    # New user text prompt
     
     Label(win, text = "Looks like you are a new user", fg = "red", font = ("ariel", 12)).grid(row = 0)
     Label(win, text = "Create a password below so that you can use the program successfully everytime you login").grid(row = 1, pady = 15)
     
-    #password box and entry
+    # Password box and entry
     
     Label(win, text = " New Password").grid(row = 2, padx = 20, sticky = W)
     passw1 = Entry(win, width = 40, show = "*")
@@ -257,7 +304,7 @@ else:
     passw2 = Entry(win, width = 40, show = "*")
     passw2.grid(row = 3, pady = 5, padx = 110, sticky = W) 
     
-    #proceed button
+    # Proceed button
     
     proceed = Button(win, text = "Proceed>", width = 10)
     proceed.bind("<Button-1>", match)
