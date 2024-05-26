@@ -13,29 +13,45 @@ def SHA_256(hash_string):
 
 def option():
     
-    def add():
+    def add_Or_Update():
         # accepting input from the user
         username = entryName.get().capitalize()
 
         # accepting password input from the user
         password = entryPassword.get()
 
-
-
-        if username and password:
-
-            # Confirm entry
-            confirm = messagebox.askyesno("Confirm Add", 
-                                              f"Verify and add the Password for {username}?\nPassword : {password}")
-            
-            if confirm:
-                with open("passwords.txt", 'a') as f:
-                    f.write(f"{username} {password}\n")
-                messagebox.showinfo("Success", "Password added !!")
-            else:
-                return # Try again , revert back to the platform
-        else:
+        # To handle the case when one of the fields is not filled up
+        if not (username and password):
             messagebox.showerror("Error", "Please enter both the fields")
+            return
+
+        else:
+        # Check if the app exists in the file
+            passwords = {}
+            try:
+                with open("passwords.txt", 'r') as f:
+                    for k in f:
+                        i = k.strip().split(' ')
+                        passwords[i[0]] = i[1]
+            except FileNotFoundError:
+                pass
+
+            if username in passwords:
+                # Update the password
+                confirm = messagebox.askyesno("Confirm Update", f"The app '{username}' is already added.\nDo you still want to update your password?")
+                if confirm:
+                    passwords[username] = password
+                    with open("passwords.txt", 'w') as f:
+                        for user, pwd in passwords.items():
+                            f.write(f"{user} {pwd}\n")
+                    messagebox.showinfo("Success", f"Your password for '{username}' is updated successfully!")
+            else:
+                # Add the password if app is inexistent in the system
+                confirm = messagebox.askyesno("Confirm Add", f"Verify and add the Password for {username}?\nPassword : {password}")
+                if confirm:
+                    with open("passwords.txt", 'a') as f:
+                        f.write(f"{username} {password}\n")
+                    messagebox.showinfo("Success", "Password added !!")
 
 
     def get():
@@ -213,8 +229,8 @@ def option():
     entryPassword = Entry(app, show = "*")
     entryPassword.grid(row=1, column=1, padx=10, pady=5)
 
-    # Add button
-    buttonAdd = Button(app, text="Add", command=add)
+    # Add/Update button
+    buttonAdd = Button(app, text="Add/Update", command=add_Or_Update)
     buttonAdd.grid(row=2, column=0, padx=15, pady=8, sticky="we")
 
     # Get button
