@@ -4,102 +4,102 @@ from tkinter import messagebox
 import os
 import hashlib
 
+import sqlite3
+
+# Connect to SQLite database (it will create the database if it doesn't exist)
+conn = sqlite3.connect('passwords.db')
+
+# Create a cursor object
+cursor = conn.cursor()
+
+# Create the passwords table
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS passwords (
+    id INTEGER PRIMARY KEY,
+    app_name TEXT NOT NULL,
+    password TEXT NOT NULL
+)
+''')
+
+# Commit the changes and close the connection
+conn.commit()
+conn.close()
+
+
 
 def SHA_256(hash_string):
     sha_signature = hashlib.sha256(hash_string.encode()).hexdigest()
     return sha_signature
 
-
-
-def option():
+def option():   
     
     def add_Or_Update():
         # accepting input from the user
         username = entryName.get().capitalize()
-
+        
         # accepting password input from the user
         password = entryPassword.get()
-
+        
         # To handle the case when one of the fields is not filled up
         if not (username and password):
             messagebox.showerror("Error", "Please enter both the fields")
             return
+        
+        conn = sqlite3.connect('passwords.db')
+        cursor = conn.cursor()
 
+        # Check if the app exists in the database
+        cursor.execute('SELECT * FROM passwords WHERE app_name = ?', (username,))
+        result = cursor.fetchone()
+        
+        if result:
+            # Update the password
+            confirm = messagebox.askyesno("Confirm Update", f"The app '{username}' is already added.\nDo you still want to update your password?")
+            if confirm:
+                cursor.execute('UPDATE passwords SET password = ? WHERE app_name = ?', (password, username))
+                conn.commit()
+                messagebox.showinfo("Success", f"Your password for '{username}' is updated successfully!")
         else:
-        # Check if the app exists in the file
-            passwords = {}
-            try:
-                with open("passwords.txt", 'r') as f:
-                    for k in f:
-                        i = k.strip().split(' ')
-                        passwords[i[0]] = i[1]
-            except FileNotFoundError:
-                pass
+            # Add the password if app is inexistent in the system
+            confirm = messagebox.askyesno("Confirm Add", f"Verify and add the Password for {username}?\nPassword : {password}")
+            if confirm:
+                cursor.execute('INSERT INTO passwords (app_name, password) VALUES (?, ?)', (username, password))
+                conn.commit()
+                messagebox.showinfo("Success", "Password added !!")
 
-            if username in passwords:
-                # Update the password
-                confirm = messagebox.askyesno("Confirm Update", f"The app '{username}' is already added.\nDo you still want to update your password?")
-                if confirm:
-                    passwords[username] = password
-                    with open("passwords.txt", 'w') as f:
-                        for user, pwd in passwords.items():
-                            f.write(f"{user} {pwd}\n")
-                    messagebox.showinfo("Success", f"Your password for '{username}' is updated successfully!")
-            else:
-                # Add the password if app is inexistent in the system
-                confirm = messagebox.askyesno("Confirm Add", f"Verify and add the Password for {username}?\nPassword : {password}")
-                if confirm:
-                    with open("passwords.txt", 'a') as f:
-                        f.write(f"{username} {password}\n")
-                    messagebox.showinfo("Success", "Password added !!")
-
+        conn.close()
 
     def get():
         # accepting input from the user
         username = entryName.get().capitalize()
+        
+        conn = sqlite3.connect('passwords.db')
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT password FROM passwords WHERE app_name = ?', (username,))
+        result = cursor.fetchone()
 
-        # creating a dictionary to store the data in the form of key-value pairs
-        passwords = {}
-        try:
-            # opening the text file
-            with open("passwords.txt", 'r') as f:
-                for k in f:
-                    i = k.split(' ')
-                    # creating the key-value pair of username and password.
-                    passwords[i[0]] = i[1]
-        except:
-            # displaying the error message
-            print("ERROR !!")
-
-        if passwords and len(username) != 0:
-            mess = "Your passwords:\n"
-            for i in passwords:
-                if i == username:
-                    mess += f"Password for {username} is {passwords[i]}\n"
-                    break
-            else:
-                mess += "No Such App Name Exists !!"
-            messagebox.showinfo("Passwords", mess)
-        elif len(username) == 0:
-            messagebox.showerror("App Name", f"Please fill in the field: 'App Name'")
+        if result:
+            password = result[0]
+            messagebox.showinfo("Passwords", f"Password for {username} is {password}")
         else:
             messagebox.showerror("Error", f"No such app name: {username} exists!")
+        
+        conn.close()
 
 
     def getlist():
-        # creating a dictionary
-        passwords = {}
+        conn = sqlite3.connect('passwords.db')
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT app_name, password FROM passwords')
+        records = cursor.fetchall()
+        
+        conn.close()
 
-        # adding a try block, this will catch errors such as an empty file or others
-        try:
-            with open("passwords.txt", 'r') as f:
-                for k in f:
-                    i = k.split(' ')
-                    passwords[i[0]] = i[1]
-        except:
-            print("No passwords found!!")
+        if records:
+            passwords = {app: pwd for app, pwd in records}
 
-        if passwords:
             list_win = Toplevel(app)
             list_win.title("List of Passwords")
             list_win.geometry("1000x1000")
@@ -162,46 +162,25 @@ def option():
     def delete():
         # accepting input from the user
         username = entryName.get().capitalize()
-
-        # Check if app name exist
-        user_found = False
-
-        # creating a temporary list to store the data
-        temp_passwords = []
-
-        # reading data from the file and excluding the specified username
-        try:
-            with open("passwords.txt", 'r') as f:
-                for k in f:
-                    i = k.split(' ')
-                    if i[0] != username:
-                        temp_passwords.append(f"{i[0]} {i[1]}")
-                    else:
-                        user_found = True # Set true once data is read
-            
-            if user_found and len(username) != 0:
-
-            #Ask for confirmation from the user 
-                confirm = messagebox.askyesno("Confirm Delete", 
-                                              f"Are you sure you want to delete the password for {username}?")
-                
-                if confirm:
-                # writing the modified data back to the file
-                    with open("passwords.txt", 'w') as f:
-                        for line in temp_passwords:
-                            f.write(line)
-                    messagebox.showinfo(
-                    "Success", f"App: {username} deleted successfully!")
-                else:
-                    messagebox.showinfo(
-                    "Cancelled", f"The password for {username} still remains!")
-            elif len(username) == 0:
-                messagebox.showerror("Error", f"Please fill in the field: 'App Name'")
-            else:
-                 messagebox.showerror("Error", f"App: {username} does not exist!")
         
-        except Exception as e:
-            messagebox.showerror("Error", f"Error deleting app {username}: {e}")
+        conn = sqlite3.connect('passwords.db')
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM passwords WHERE app_name = ?', (username,))
+        result = cursor.fetchone()
+
+        if result:
+            confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete the password for {username}?")
+            if confirm:
+                cursor.execute('DELETE FROM passwords WHERE app_name = ?', (username,))
+                conn.commit()
+                messagebox.showinfo("Success", f"App: {username} deleted successfully!")
+            else:
+                messagebox.showinfo("Cancelled", f"The password for {username} still remains!")
+        else:
+            messagebox.showerror("Error", f"App: {username} does not exist!")
+        
+        conn.close()
 
     def show_password():
         if entryPassword.cget('show') == '*':
