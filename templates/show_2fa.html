@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Setup</title>
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='bg-img.png') }}");
+            background-size: cover;
+            color: #bbff00;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 36px;
+        }
+
+        .container {
+            width: 500px;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        img {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+
+        p {
+            color: #333;
+            margin-top: 10px;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #ff2a00;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Two-Factor Authentication Setup</h1>
+    <div class="container">
+        <p>Scan the QR code below with your 2FA app:</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ otp_uri }}" alt="QR Code">
+        <p>Or enter this code manually: {{ otp_uri.split('=')[1] }}</p>
+        <a href="{{ url_for('login') }}">Back to Login</a>
+    </div>
+</body>
+</html>

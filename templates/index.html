@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='bg-img2.png') }}"); 
+            background-size: cover;
+            color: rgb(255, 255, 255);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: rgb(255, 255, 255);
+            text-align: center;
+        }
+
+        label {
+            color: rgb(255, 255, 255);
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        form {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            margin: 10px 0;
+        }
+
+        input[type="text"], input[type="password"], button {
+            width: calc(100% - 10px);
+            padding: 10px;
+            margin: 5px 0 10px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .red-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        #flash-messages {
+            list-style-type: none;
+            position: fixed;
+            top: 20px; 
+            right: 20px; 
+            padding: 10px;
+            color: #ff0019;
+            border-radius: 5px;
+            z-index: 9999; 
+            font-size: 30px;
+        }
+
+        #flash-messages .info {
+            background-color: #d4edda; 
+            color: #155724;
+            font-size: 30px;
+        }
+
+        #flash-messages .success {
+            background-color: #d4edda; 
+            color: #155724;
+            font-size: 30px; 
+        }
+
+        .red-text {
+            color: red;
+            text-align: center;
+        }
+
+        #password_strength_feedback, #password_strength_check_feedback {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="red-text">Welcome, {{ current_user.username }}!</h1>
+    
+    <form method="post" action="{{ url_for('add_password') }}" id="add_password_form">
+        <h2>Add/Update Password</h2>
+        <label for="app_name">App Name:</label>
+        <input type="text" name="app_name" id="app_name" required>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+        <div id="password_strength_feedback"></div> 
+        <input type="checkbox" id="show_password"> Show Password
+        <button type="submit">Add/Update</button>
+    </form>
+    
+    <form id="password_strength_checker_form">
+        <h2>Password Strength Checker</h2>
+        <label for="password_strength_check">Enter a password to check its strength:</label>
+        <input type="password" id="password_strength_check" required>
+        <div id="password_strength_check_feedback"></div>
+        <input type="checkbox" id="show_password_strength_check"> Show Password
+    </form>
+    
+    <form method="post" action="{{ url_for('get_password') }}">
+        <h2>Get and Copy Password</h2>
+        <label for="app_name">App Name:</label>
+        <input type="text" name="app_name" id="app_name" required>
+        <button type="submit">Get and Copy</button>
+    </form>
+    
+    <form method="post" action="{{ url_for('delete_password') }}">
+        <h2>Delete Password</h2>
+        <label for="app_name">App Name:</label>
+        <input type="text" name="app_name" id="app_name" required>
+        <button type="submit">Delete</button>
+    </form>
+    
+    <form method="get" action="{{ url_for('list_passwords') }}">
+        <h2>List All Passwords</h2>
+        <button type="submit">List</button>
+    </form>
+    
+    <form method="post" action="{{ url_for('logout') }}">
+        <h2 class="red-text">Logout</h2>
+        <button type="submit" class="red-button">Logout</button>
+    </form>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul id="flash-messages">
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                setTimeout(function() {
+                    flashMessages.remove();
+                }, 5000); // 5000 milliseconds = 5 seconds before notifications disappear
+            }
+        });
+    </script>
+
+    <script>
+        document.getElementById('password_strength_check').addEventListener('input', function() {
+            var password = this.value;
+            var feedbackElement = document.getElementById('password_strength_check_feedback');
+            var strength = 0;
+            
+            // Password Strength Checker implementation
+            if (password.length >= 10) {
+                strength += 1;
+            }
+
+            // Check for uppercase letters
+            if ((/[A-Z]/.test(password)) && password.length >= 12) {
+                strength += 1;
+            }
+
+            // Check for lowercase letters
+            if (/[a-z]/.test(password) && password.length >= 12) {
+                strength += 1;
+            }
+
+            // Check for numerical digits
+            if (/\d/.test(password) && password.length >= 12) {
+                strength += 1;
+            }
+
+            // Check for special characters
+            if (/[!@#$%^&*()_+\-=_[\]{};':"\\|,.<>/?~`<>]/.test(password) && password.length >= 12) {
+                strength += 1;
+            }
+
+            // Display the feedback based on password strength
+            switch (strength) {
+                case 0:
+                    feedbackElement.innerHTML = 'Password strength: Weak, Do seriously consider changing the password for your app';
+                    feedbackElement.style.color = 'red';
+                    break;
+                case 1:
+                case 2:
+                    feedbackElement.innerHTML = 'Password strength: Medium, Encouraged to change the password for your app';
+                    feedbackElement.style.color = 'orange';
+                    break;
+                case 3:
+                case 4:
+                    feedbackElement.innerHTML = 'Password strength: Strong, Amazing! Your App is secure! Feel free to add your password into PassManager anytime! ';
+                    feedbackElement.style.color = 'yellow';
+                    break;
+                case 5:
+                    feedbackElement.innerHTML = 'Password strength: Very Strong, Excellent! Your App is extremely secure! Feel free to add your password into PassManager anytime!';
+                    feedbackElement.style.color = 'lime';
+                    break;
+            }
+        });
+
+        document.getElementById('show_password').addEventListener('change', function() {
+            var passwordInput = document.getElementById('password');
+            if (this.checked) {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        });
+
+        document.getElementById('show_password_strength_check').addEventListener('change', function() {
+            var passwordInput = document.getElementById('password_strength_check');
+            if (this.checked) {
+                passwordInput.type = 'text';
+            } else {
+                passwordInput.type = 'password';
+            }
+        });
+    </script>
+</body>
+</html>

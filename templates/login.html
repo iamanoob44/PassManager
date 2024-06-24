@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body {
+      background-image: url("{{ url_for('static', filename='bg-img.png') }}");
+      background-size: cover;
+      color: #fff; 
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+      width: calc(100% - 20px);
+      padding: 5px;
+      height: 30px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #0056b3;
+    }
+    
+    h1 {
+      text-align: left;
+      margin-bottom: 300px;
+      font-size: 128px;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+    
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #ff0000;
+      text-decoration: none; 
+      font-size: 28px
+    }
+  </style>
+</head>
+<body>
+  <h1>PassManager</h1>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul>
+      {% for category, message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <div class="form-container">
+    <form action="{{ url_for('login') }}" method="post">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password">
+      <label for="otp_token">2FA Token:</label>
+      <input type="text" id="otp_token" name="otp_token">
+      <button type="submit">Login</button>
+    </form>
+    <a href="{{ url_for('register') }}">Click here to register if you are new</a>
+  </div>
+</body>
+</html>
