@@ -34,7 +34,8 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -76,22 +77,63 @@
             margin-top: 10px;
         }
     </style>
+    <script>
+        function validateForm(event) {
+            var username = document.getElementById("username").value;
+            if (username.includes(" ")) {
+                event.preventDefault();
+                document.getElementById("usernameError").innerText = "Error, username should not have any spacing";
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Register</h1>
-    <form action="{{ url_for('register') }}" method="post">
+    <form action="{{ url_for('register') }}" method="post" onsubmit="validateForm(event)">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username">
+        <p style="color: black;">Please note: Username should not contain any spaces.</p>
+        <input type="text" id="username" name="username" value="{{ entered_username }}" placeholder="Enter username (no spaces)" required>
+        <p id="usernameError" class="error-message"></p>
+        
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password">
+        <input type="password" id="password" name="password" required>
+        
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+        
+        <label for="security_question">Security Question:</label>
+        <select id="security_question" name="security_question" required>
+            <option value="" disabled>Select a question</option>
+            <option value="What is your mother's name?" {% if entered_security_question == "What is your mother's name?" %} selected {% endif %}>What is your mother's name?</option>
+            <option value="What is your father's name?" {% if entered_security_question == "What is your father's name?" %} selected {% endif %}>What is your father's name?</option>
+            <option value="In what city or town did your parents first meet?" {% if entered_security_question == "In what city or town did your parents first meet?" %} selected {% endif %}>In what city or town did your parents first meet?</option>
+            <option value="What is your country of birth?" {% if entered_security_question == "What is your country of birth?" %} selected {% endif %}>What is your country of birth?</option>
+            <option value="Which primary school did you attend?" {% if entered_security_question == "Which primary school did you attend?" %} selected {% endif %}>Which primary school did you attend?</option>
+            <option value="Which secondary school did you attend?" {% if entered_security_question == "Which secondary school did you attend?" %} selected {% endif %}>Which secondary school did you attend?</option>
+            <option value="What is the name of the town where you were first born?" {% if entered_security_question == "What is the name of the town where you were first born?" %} selected {% endif %}>What is the name of the town where you were first born?</option>
+        </select>
+        
+        <label for="security_answer">Security Answer:</label>
+        <input type="text" id="security_answer" name="security_answer" value="{{ entered_security_answer }}" required>
+        
         <button type="submit">Register</button>
+        
         {% if username_exists %}
-        <p class="error-message">Username already exists, please try another one.</p>
+        <p class="error-message">Username not available. Please enter another one.</p>
         {% endif %}
+        
         {% if missing_fields %}
-        <p class="error-message">Please fill out both fields!</p>
+        <p class="error-message">Please fill out all fields!</p>
+        {% endif %}
+        
+        {% if passwords_not_match %}
+        <p class="error-message">Passwords do not match, please try again.</p>
+        {% endif %}
+        
+        {% if username_spacing_error %}
+        <p class="error-message">Error, username should not have any spacing.</p>
         {% endif %}
     </form>
-    <a href="{{ url_for('login') }}">Login</a>
+    <a href="{{ url_for('login') }}">Back to Login</a>
 </body>
 </html>

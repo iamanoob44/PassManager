@@ -3,6 +3,8 @@ import random
 import hashlib
 import subprocess
 import sys
+import os
+
 
 try:
     from Crypto.Protocol.KDF import PBKDF2

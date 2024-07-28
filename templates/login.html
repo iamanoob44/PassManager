@@ -41,7 +41,7 @@
       text-align: left;
       margin-bottom: 300px;
       font-size: 128px;
-      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
     
     a {
@@ -50,7 +50,20 @@
       margin-top: 20px;
       color: #ff0000;
       text-decoration: none; 
-      font-size: 28px
+      font-size: 28px;
+    }
+
+    .message-list {
+      text-align: center;
+      list-style: none;
+      padding: 0;
+    }
+    
+    .message-list li {
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: rgba(0, 0, 0, 0.5);
     }
   </style>
 </head>
@@ -58,9 +71,9 @@
   <h1>PassManager</h1>
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <ul>
+      <ul class="message-list">
       {% for category, message in messages %}
-        <li>{{ message }}</li>
+        <li class="alert-{{ category }}">{{ message }}</li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -68,14 +81,16 @@
   <div class="form-container">
     <form action="{{ url_for('login') }}" method="post">
       <label for="username">Username:</label>
-      <input type="text" id="username" name="username">
+      <input type="text" id="username" name="username" value="{{ username }}">
       <label for="password">Password:</label>
-      <input type="password" id="password" name="password">
-      <label for="otp_token">2FA Token:</label>
-      <input type="text" id="otp_token" name="otp_token">
+      <input type="password" id="password" name="password" value="{{ password }}">
+      <label for="otp_token">2FA Token (Google Authenticator):</label>
+      <input type="text" id="otp_token" name="otp_token" value="{{ otp_token }}">
       <button type="submit">Login</button>
     </form>
     <a href="{{ url_for('register') }}">Click here to register if you are new</a>
+    <a href="{{ url_for('forget_password') }}">Forgot Password?</a>
+    <a href="{{ url_for('change_password') }}">Change Login Password?</a>
   </div>
 </body>
 </html>

@@ -54,10 +54,10 @@
 <body>
     <h1>Two-Factor Authentication Setup</h1>
     <div class="container">
-        <p>Scan the QR code below with your 2FA app:</p>
+        <p>Scan the QR code below with your 2FA app (Google Authenticator):</p>
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ otp_uri }}" alt="QR Code">
         <p>Or enter this code manually: {{ otp_uri.split('=')[1] }}</p>
-        <a href="{{ url_for('login') }}">Back to Login</a>
+        <a href="{{ url_for('login') }}">Press here once you scanned the QR Code</a>
     </div>
 </body>
 </html>
