@@ -35,23 +35,22 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
-# New connection to the online MySQL database for PythonAnywhere deployment
+'''# New connection to the online MySQL database for PythonAnywhere deployment
 def get_db_connection():
     return mysql.connector.connect(
         host='cyrolite.mysql.pythonanywhere-services.com',
         user='cyrolite',
         password='Y02030405y!',
         database='cyrolite$default'
-    )
+    ) '''
 
-# Previous connection to MySQL database using localhost 
-''' def get_db_connection():
+def get_db_connection():
     return mysql.connector.connect(
         host='localhost',
         user='iamanoob44',
         password='Chinch0ng24042002!',
         database='mypasswords'
-    )'''
+    ) # previous connection to MySQL database using localhost
 
 
 
@@ -579,7 +578,8 @@ def delete_password():
 @login_required
 def generate_password():
     length = int(request.form.get('pw_length',12))
-    if length < 12:
+    if length < 12 or length > 100:
+        flash(f'Please enter values between 12 and 100', 'error')
         return redirect(url_for('home'))
     else:
         random_pw = random_password_generator(length)
